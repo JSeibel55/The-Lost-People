@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width">
+            <title>The Lost People</title>
+
+        <!--External stylesheet links here-->
+        <link href="https://fonts.googleapis.com/css2?family=Open+Sans&display=swap" rel="stylesheet">
+        <link rel="stylesheet" href="lib/leaflet/leaflet.css">
+        <link href="http://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://use.typekit.net/uwk1tue.css">
+        <link rel="stylesheet" href="css/L.Control.OpenCageData.Search.min.css">
+        <link rel="stylesheet" href="css/bootstrap/bootstrap.min.css">
+        <link rel="stylesheet" href="css/style.css">
+
+    </head>
+
+    <body>
+        <div id="loadingScreen">
+          <div id="spinner"></div>
+        </div>
+
+        <!-- Splash Screen Modal -->
+        <div class="modal fade" id="splash-screen" tabindex="-1" role="dialog" aria-labelledby="splash-screen" aria-hidden="true" data-backdrop="static">
+            <div class="modal-dialog modal-dialog-centered modal-xl" role="document">
+                <div class="modal-content">
+                    <div class="modal-header" style="border-bottom: none; text-align: center">
+                        <h5 class="col-12 modal-title" id="modalTitle">The Lost People</h5>
+                    </div>
+                    <div class="modal-body" style="padding-bottom: 0rem; padding-top: 0.25rem">
+                      <p>Welcome to The Lost People, the unofficial NamUs.gov spatial database viewer and querier. NamUs (National Missing and Unidentified Persons System) is a public database for searching cases of missing, unidentified, and unclaimed persons in the United States, including territories. The purpose of this website is to offer an alternative querying tool and to provide a spatial view of the number of cases by state, county, and city.</p>
+                      <p><strong><span style="color:#66A3D9;">Missing Person:</span></strong> A person who has disappeared and may be alive or deceased.</p>
+                      <p><strong><span style="color:#F2B872;">Unidentified Person:</span></strong> A deceased person whose legal identity is unknown (Jane or John Doe).</p>
+                      <p><strong><span style="color:#D96A6A;">Unclaimed Person:</span></strong> A deceased person with a known name, but with no known next of kin, or family member, who could claim the deceased's body for burial or disposal.</p>
+                      <p><strong>Disclaimer:</strong> Cases will only appear in NamUs if a public or professional user reports the case to NamUs. Currently only four states (New York, Connecticut, Tennessee, and New Jersey) have legislation requiring new cases to be reported by law enforcement. Therefore, it should be noted that cases available on this site are merely a subset of the total missing, unidentified, and unclaimed persons nationwide. For example, in 2019 the NCIC (National Crime Information Center) estimated there are more than 87,000 missing persons in the country - as of 4/18/2020, NamUs only has records for 17,892 missing persons.</p>
+                      <p>Case records in each of the three databases were mapped to the highest possible level. For example, all records that specified a state were mapped at the state level, all records that further specified a county were also mapped at the county level, and all records that further specified a city were also mapped at the city level.</p>
+                      <p>Data in this webmap is not currently synced with NamUs - data shown was pulled from NamUs on 4/18/2020.</p>
+                      <p>This interactive webmap was made at the University of Wisconsin-Madison for Interactive Cartography & Geovisualization (GEOG 575, Spring 2020).</p>
+                      <p>Created by Hayley Corson-Dosch, Christopher Pierson, and Josh Seibel.</p>
+                    </div>
+                    <div class="modal-footer" style="border-top: none; justify-content: flex-end;">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Container for Everything Else. Row 1: Title, Filter, Map. Row 2: Names List -->
+        <div class="page-content">
+
+            <!-- First Row for the filter and map -->
+            <div class="row main">
+
+                <!-- Sidebar Container -->
+                <div id="sidebar-panel">
+
+                    <!-- Title -->
+                    <div class="title-navbar">The Lost People</div>
+
+                    <div class="filter-panel">
+
+                        <!-- Database Tab -->
+                        <div id="accordion" role="tablist" aria-multiselectable="true">
+                            <div class="card" style="border-color: black; border-radius: 0px 0px 0px 0px;">
+                            <a data-toggle="collapse" data-parent="#accordion" href="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                                <div class="card-header" role="tab" id="headingOne" style="border-color: black; border-radius: 0px 0px 0px 0px;">
+                                <h5 class="mb-0 data-header menu-item">
+                                    Data: <span style="color:#78BFA5;">Combined </span><img id="#dropdown" src="img/noun_Dropdown.svg" width="25" height="25">
+                                </h5>
+                                </div>
+                            </div>
+                            </a>
+
+                            <div id="collapseOne" class="collapse show" aria-labelledby="headingOne" data-parent="#filter-accordion">
+                                <!-- Data Contents -->
+                                <div class="card-body" for="headingOne">
+                                    <div class="form-check">
+                                        <input class="database-check" type="radio" name="database" id="combined" value="combined-database" checked="checked">
+                                        <label class="form-check-label" for="combined" id='combined-selection'>
+                                            Combined Database
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="database-check" type="radio" name="database" id="missing-persons" value="missing-persons">
+                                        <label class="form-check-label" for="missing-persons" id='missing-selection'>
+                                            Missing Persons
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="database-check" type="radio" name="database" id="unidentified-persons" value="unidentified-persons">
+                                        <label class="form-check-label" for="unidentified-persons" id='unidentified-selection'>
+                                            Unidentified Persons
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="database-check" type="radio" name="database" id="unclaimed-persons" value="unclaimed-persons">
+                                        <label class="form-check-label" for="unclaimed-persons" id='unclaimed-selection'>
+                                            Unclaimed Persons
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Map Scale Tab -->
+                        <div id="accordion" role="tablist" aria-multiselectable="true">
+                            <div class="card" style="border-color: black; border-radius: 0px 0px 0px 0px;">
+                            <a id="scale-filt" data-toggle="collapse" data-parent="#accordion" href="#collapseTwo" aria-expanded="true" aria-controls="collapseTwo">
+                                <div class="card-header" role="tab" id="headingTwo" style="border-color: black; border-radius: 0px 0px 0px 0px;">
+                                <h5 class="mb-0 mapScale-header menu-item">
+                                    Map Scale: State <img id="#dropdown" src="img/noun_Dropdown.svg" width="25" height="25">
+                                </h5>
+                                </div>
+                            </div>
+                            </a>
+
+                            <div id="collapseTwo" class="collapse hide" aria-labelledby="headingTwo" data-parent="#filter-accordion">
+                                <!-- Map Scale Contents -->
+                                <div class="card-body">
+                                    <div class="form-check">
+                                        <input class="mapScale-check" type="radio" name="mapScale" id="state-scale" value="state-scale" checked="checked">
+                                        <label class="form-check-label" for="state-scale">
+                                            State Level
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="mapScale-check" type="radio" name="mapScale" id="county-scale" value="county-scale">
+                                        <label class="form-check-label" for="county-scale">
+                                            County Level
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="mapScale-check" type="radio" name="mapScale" id="city-scale" value="city-scale">
+                                        <label class="form-check-label" for="city-scale">
+                                            City Level
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Advance Filter Tab -->
+                        <div id="accordion" role="tablist" aria-multiselectable="true">
+                            <div class="card" style="border-color: black; border-radius: 0px 0px 0px 0px;">
+                            <a id="adv-filt" data-toggle="" data-parent="#accordion" href="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                                <div class="card-header" role="tab" id="headingThree" style="border-color: black; border-radius: 0px 0px 0px 0px;">
+                                <h5 class="mb-0 menu-item">
+                                    Advanced Filters <img id="#dropdown" src="img/noun_Dropdown.svg" width="25" height="25">
+                                </h5>
+                                </div>
+                            </div>
+                            </a>
+
+                            <div id="collapseThree" class="collapse" aria-labelledby="headingThree" data-parent="#filter-accordion">
+                                <!-- Buttons -->
+                                <div class="row adv-filter-buttons">
+                                    <button class="btn btn-outline-success reset-btn" type="reset">Reset</button>
+                                    <button class="btn btn-outline-success submit-btn" type="submit">Submit</button>
+                                </div>
+                                <br>
+                                <form name="advanced-filter" id="advanced-filter">
+                                    <!-- Advance Filter Contents -->
+                                    <div class="card-body adv-filter-card">
+                                        <!-- Gender Options -->
+                                        <div class="row adv-filter-row">
+                                            <strong class="form-option">Gender</strong>
+                                            <div class="form-check">
+                                                <input class="gender-check" type="radio" name="gender" id="gender-all" value="All" checked="checked">
+                                                <label class="form-check-label" for="gender-all">
+                                                    All
+                                                </label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="gender-check" type="radio" name="gender" id="gender-female" value="Female">
+                                                <label class="form-check-label" for="gender-female">
+                                                    Female
+                                                </label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="gender-check" type="radio" name="gender" id="gender-male" value="Male">
+                                                <label class="form-check-label" for="gender-male">
+                                                    Male
+                                                </label>
+                                            </div>
+                                            <div id="special-genders">
+                                                <div class="form-check">
+                                                    <input class="gender-check" type="radio" name="gender" id="gender-other" value="Other">
+                                                    <label class="form-check-label" for="gender-other">
+                                                        Other
+                                                    </label>
+                                                </div>
+                                                <div class="form-check">
+                                                    <input class="gender-check" type="radio" name="gender" id="gender-unsure" value="Unsure">
+                                                    <label class="form-check-label" for="gender-unsure">
+                                                        Unsure
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <hr>
+
+                                        <!-- Age -->
+                                        <div id="age-selection">
+                                            <strong class="form-option">Age</strong>
+                                            <div class="form-group row">
+                                                <label for="ageFrom" class="col-sm-6 col-form-label">Age From: </label>
+                                                <div class="col-sm-5">
+                                                <input type="number" class="form-control ageFrom-check" id="ageFrom-check" min="0" max="100" placeholder="0" value="0" style="color: #1E2021; background-color: #e8e8e8; border: #e8e8e8">
+                                                </div>
+                                            </div>
+                                            <div class="form-group row">
+                                                <label for="ageTo" class="col-sm-6 col-form-label">Age To: </label>
+                                                <div class="col-sm-5">
+                                                <input type="number" class="form-control ageTo-check" id="ageTo-check" min="1" max="120" placeholder="120" value="120" style="color: #1E2021; background-color: #e8e8e8; border: #e8e8e8">
+                                                </div>
+                                            </div>
+                                            <hr>
+                                        </div>
+
+                                        <!-- Ethnicity -->
+                                        <strong class="form-option">Ethnicity</strong>
+                                        <div class="row adv-filter-row">
+                                            <div class="form-check">
+                                                <input class="form-check-input ethnicity-check" type="checkbox" name="ethnicity-all" id="ethnicity-all" checked="checked">
+                                                <label class="form-check-label active" for="ethnicity-all">
+                                                    Select All
+                                                </label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input ethnicity-check" type="checkbox" name="ethnicity-check" value="American Indian / Alaska Native" id="ethnicity-native" checked="checked">
+                                                <label class="form-check-label" for="ethnicity-native">
+                                                    American Indian / Alaska Native
+                                                </label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input ethnicity-check" type="checkbox" name="ethnicity-check" value="Asian" id="ethnicity-asian" checked="checked">
+                                                <label class="form-check-label" for="ethnicity-asian">
+                                                    Asian
+                                                </label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input ethnicity-check" type="checkbox" name="ethnicity-check" value="Black / African American" id="ethnicity-black" checked="checked">
+                                                <label class="form-check-label" for="ethnicity-black">
+                                                    Black / African American
+                                                </label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input ethnicity-check" type="checkbox" name="ethnicity-check" value="Hawaiian / Pacific Islander" id="ethnicity-hawaiian" checked="checked">
+                                                <label class="form-check-label" for="ethnicity-hawaiian">
+                                                    Hawaiian / Pacific Islander
+                                                </label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input ethnicity-check" type="checkbox" name="ethnicity-check" value="Hispanic / Latino" id="ethnicity-hispanic" checked="checked">
+                                                <label class="form-check-label" for="ethnicity-hispanic">
+                                                    Hispanic / Latino
+                                                </label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input ethnicity-check" type="checkbox" name="ethnicity-check" value="White / Caucasian" id="ethnicity-white" checked="checked">
+                                                <label class="form-check-label" for="ethnicity-white">
+                                                    White / Caucasian
+                                                </label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input ethnicity-check" type="checkbox" name="ethnicity-check" value="Other" id="ethnicity-other" checked="checked">
+                                                <label class="form-check-label" for="ethnicity-other">
+                                                    Other
+                                                </label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input ethnicity-check" type="checkbox" name="ethnicity-check" value="Uncertain" id="ethnicity-uncertain" checked="checked">
+                                                <label class="form-check-label" for="ethnicity-uncertain">
+                                                    Uncertain
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <hr>
+
+                                        <!-- When Gone Missing/Found -->
+                                        <strong id="date-gone-found" class="form-option">...</strong>
+                                        <br>
+                                        -- Year --
+                                        <br>
+                                        <div class="form-group row">
+                                            <label for="yearStart" class="col-sm-6 col-form-label">Start: </label>
+                                            <div class="col-sm-6">
+                                            <input type="number" class="form-control yearStart-check" id="yearStart-check" placeholder="1900" value="1900" style="color: #1E2021; background-color: #e8e8e8; border: #e8e8e8">
+                                            </div>
+                                        </div>
+                                        <div class="form-group row">
+                                            <label for="yearEnd" class="col-sm-6 col-form-label">End: </label>
+                                            <div class="col-sm-6">
+                                            <input type="number" class="form-control yearEnd-check" id="yearEnd-check" placeholder="2020" value="2020" style="color: #1E2021; background-color: #e8e8e8; border: #e8e8e8">
+                                            </div>
+                                        </div>
+                                        <br>
+                                        -- Month --
+                                        <br>
+                                        <div class="form-check">
+                                            <input class="form-check-input month-check" type="checkbox" id="month-all" name="month-all" checked="checked">
+                                            <label class="form-check-label active" for="month-all">
+                                            Select All
+                                            </label>
+                                        </div>
+                                        <div class="form-check form-check-inline">
+                                            <input class="form-check-input month-check" type="checkbox" id="month-jan" name="month-check" value="1" checked="checked">
+                                            <label class="form-check-label" for="month-jan">Jan</label>
+                                        </div>
+                                        <div class="form-check form-check-inline">
+                                            <input class="form-check-input month-check" type="checkbox" id="month-feb" name="month-check" value="2" checked="checked">
+                                            <label class="form-check-label" for="month-feb">Feb</label>
+                                        </div>
+                                        <div class="form-check form-check-inline">
+                                            <input class="form-check-input month-check" type="checkbox" id="month-march" name="month-check" value="3" checked="checked">
+                                            <label class="form-check-label" for="month-march">March</label>
+                                        </div>
+                                        <div class="form-check form-check-inline">
+                                            <input class="form-check-input month-check" type="checkbox" id="month-april" name="month-check" value="4" checked="checked">
+                                            <label class="form-check-label" for="month-april">April</label>
+                                        </div>
+                                        <div class="form-check form-check-inline">
+                                            <input class="form-check-input month-check" type="checkbox" id="month-may" name="month-check" value="5" checked="checked">
+                                            <label class="form-check-label" for="month-may">May</label>
+                                        </div>
+                                        <div class="form-check form-check-inline">
+                                            <input class="form-check-input month-check" type="checkbox" id="month-june" name="month-check" value="6" checked="checked">
+                                            <label class="form-check-label" for="month-june">June</label>
+                                        </div>
+                                        <div class="form-check form-check-inline">
+                                            <input class="form-check-input month-check" type="checkbox" id="month-july" name="month-check" value="7" checked="checked">
+                                            <label class="form-check-label" for="month-july">July</label>
+                                        </div>
+                                        <div class="form-check form-check-inline">
+                                            <input class="form-check-input month-check" type="checkbox" id="month-aug" name="month-check" value="8" checked="checked">
+                                            <label class="form-check-label" for="month-aug">Aug</label>
+                                        </div>
+                                        <div class="form-check form-check-inline">
+                                            <input class="form-check-input month-check" type="checkbox" id="month-sept" name="month-check" value="9" checked="checked">
+                                            <label class="form-check-label" for="month-sept">Sept</label>
+                                        </div>
+                                        <div class="form-check form-check-inline">
+                                            <input class="form-check-input month-check" type="checkbox" id="month-oct" name="month-check" value="10" checked="checked">
+                                            <label class="form-check-label" for="month-oct">Oct</label>
+                                        </div>
+                                        <div class="form-check form-check-inline">
+                                            <input class="form-check-input month-check" type="checkbox" id="month-nov" name="month-check" value="11" checked="checked">
+                                            <label class="form-check-label" for="month-nov">Nov</label>
+                                        </div>
+                                        <div class="form-check form-check-inline">
+                                            <input class="form-check-input month-check" type="checkbox" id="month-dec" name="month-check" value="12" checked="checked">
+                                            <label class="form-check-label" for="month-dec">Dec</label>
+                                        </div>
+
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Map Container -->
+                <div id="map"></div>
+            </div>
+
+            <!-- Second Row for the Output data -->
+            <div class="row secondary">
+                <!-- Name Output Container -->
+                <div id="names-list">
+                    ...
+                </div>
+            </div>
+        </div>
+
+        <!--Internal scripts; place these within <script> tags-->
+
+        <!--External script links here-->
+        <script type="text/javascript" src="lib/jquery-3.4.1.js"></script>
+        <script type="text/javascript" src="lib/leaflet/leaflet.js"></script>
+        <script type="text/javascript" src="lib/leaflet/L.Control.OpenCageSearch.min.js"></script>
+        <script type="text/javascript" src="lib/leaflet/easy-button.js"></script>
+        <script type="text/javascript" src="lib/bootstrap/bootstrap.min.js"></script>
+        <script type="text/javascript" src="js/main.js"></script>
+    </body>
+</html>
