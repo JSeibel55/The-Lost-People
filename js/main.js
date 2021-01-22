@@ -3655,9 +3655,17 @@ $("body").on('click','a.retrieveNames', function(e){
     window.scrollTo({top: y, behavior: 'smooth'});
 });
 
-//Splash Screen when start
-$(window).on('load',function(){
-    $('#splash-screen').modal('show');
+// Open popup warning to view on desktop if user opens in mobile
+// Otherwise Splash Screen when start
+$(window).on("resize load", function () {
+    if ($( window ).width() <= 600) {
+        $('#mobile-screen').modal('show');
+        $('#splash-screen').modal('hide');
+    } else if ($( window ).width() > 600){
+        $('#mobile-screen').modal('hide');
+        $('#splash-screen').modal('show');
+    }
 });
+
 //Create Map
 $(document).ready(createMap());
