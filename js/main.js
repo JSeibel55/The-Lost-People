@@ -25,7 +25,7 @@ var unitSelected;
 
 //Declare API key and other options for OpenCageData geocoder
 var options = {
-  key: 'c0a1ea5b826c49e0bdfb6831aa2c00b3',
+  key: '536425ab5de04e479897f4577a628553',
   limit: 5, // number of results to be displayed
   position: 'topright',
   placeholder: 'Search for a place...', // the text in the empty search box
